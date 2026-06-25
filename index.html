@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>صلاتي سر حياتي</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0d3b2e">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;900&display=swap');
+:root { --primary:#0d3b2e; --secondary:#1a5c48; --accent:#c9a84c; --accent-light:#e8d5a3; --bg:#f0f4f1; --card:#ffffff; --text:#1a1a1a; --text-light:#555; --shadow:0 4px 20px rgba(0,0,0,0.08); }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Tajawal',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.header { background:linear-gradient(135deg,var(--primary),var(--secondary)); padding:20px; text-align:center; position:relative; overflow:hidden; }
+.header h1 { font-family:'Amiri',serif; font-size:2rem; color:var(--accent-light); }
+.header .subtitle { color:rgba(255,255,255,0.8); font-size:0.9rem; margin-top:5px; }
+.date-display { display:flex; justify-content:center; gap:20px; margin-top:15px; }
+.date-box { background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); padding:8px 16px; border-radius:12px; color:white; font-size:0.85rem; }
+.date-box span { display:block; font-weight:700; color:var(--accent); }
+.location-bar { background:var(--card); padding:15px 20px; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:var(--shadow); margin-bottom:10px; }
+.location-bar svg { width:20px; height:20px; fill:var(--secondary); }
+.location-bar .city-name { font-weight:700; color:var(--primary); }
+.next-prayer { background:linear-gradient(135deg,var(--primary),var(--secondary)); margin:15px; border-radius:20px; padding:25px; text-align:center; color:white; box-shadow:var(--shadow); }
+.next-prayer .label { font-size:0.9rem; opacity:0.9; }
+.next-prayer .name { font-family:'Amiri',serif; font-size:2.2rem; font-weight:700; color:var(--accent-light); }
+.next-prayer .time { font-size:3rem; font-weight:900; letter-spacing:2px; }
+.next-prayer .countdown { background:rgba(255,255,255,0.15); display:inline-block; padding:8px 20px; border-radius:30px; font-size:1.1rem; font-weight:700; }
+.prayer-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:0 15px; margin-bottom:15px; }
+.prayer-card { background:var(--card); border-radius:16px; padding:18px; text-align:center; box-shadow:var(--shadow); border:2px solid transparent; }
+.prayer-card.active { border-color:var(--accent); background:linear-gradient(135deg,#fff,#fff9e6); transform:scale(1.02); }
+.prayer-card .icon { font-size:2rem; margin-bottom:8px; }
+.prayer-card .prayer-name { font-weight:700; font-size:1.1rem; color:var(--primary); }
+.prayer-card .prayer-time { font-size:1.3rem; font-weight:900; }
+.prayer-card .prayer-time-12 { font-size:0.8rem; color:var(--text-light); }
+.tabs { display:flex; background:var(--card); margin:15px; border-radius:16px; padding:5px; box-shadow:var(--shadow); gap:5px; }
+.tab-btn { flex:1; padding:12px; border:none; background:transparent; border-radius:12px; font-family:'Tajawal',sans-serif; font-weight:700; font-size:0.95rem; color:var(--text-light); cursor:pointer; }
+.tab-btn.active { background:var(--primary); color:white; }
+.tab-content { display:none; padding:0 15px 20px; }
+.tab-content.active { display:block; }
+.surah-card { background:var(--card); border-radius:20px; padding:25px; margin-bottom:15px; box-shadow:var(--shadow); }
+.surah-card .bismillah { text-align:center; font-family:'Amiri',serif; font-size:1.6rem; color:var(--secondary); margin-bottom:15px; font-weight:700; }
+.surah-card .ayah { font-family:'Amiri',serif; font-size:1.3rem; line-height:2.2; text-align:justify; }
+.hadith-card { background:var(--card); border-radius:20px; padding:25px; margin-bottom:15px; box-shadow:var(--shadow); border-right:4px solid var(--accent); }
+.hadith-card .hadith-text { font-family:'Amiri',serif; font-size:1.2rem; line-height:2; }
+.hadith-card .hadith-source { display:flex; align-items:center; gap:8px; color:var(--text-light); font-size:0.9rem; }
+.hadith-card .badge { background:var(--accent); color:var(--primary); padding:3px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; }
+.install-prompt { position:fixed; bottom:0; left:0; right:0; background:var(--card); padding:20px; box-shadow:0 -4px 20px rgba(0,0,0,0.15); border-radius:20px 20px 0 0; z-index:1000; display:none; }
+.install-prompt .prompt-buttons { display:flex; gap:10px; }
+.install-prompt button { flex:1; padding:12px; border:none; border-radius:12px; font-family:'Tajawal',sans-serif; font-weight:700; cursor:pointer; }
+.btn-primary { background:var(--primary); color:white; }
+.btn-secondary { background:var(--bg); color:var(--text-light); }
+.loading-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:2000; }
+.loading-overlay .spinner { width:60px; height:60px; border:4px solid var(--bg); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.footer { text-align:center; padding:20px; color:var(--text-light); font-size:0.85rem; }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+<div class="spinner"></div>
+<p>جاري تحديد موقعك...</p>
+</div>
+
+<div class="header">
+<h1>صلاتي سر حياتي</h1>
+<div class="subtitle">مواقيت الصلاة والقرآن الكريم</div>
+<div class="date-display">
+<div class="date-box"><span id="hijriDate">--</span>التاريخ الهجري</div>
+<div class="date-box"><span id="gregDate">--</span>التاريخ الميلادي</div>
+</div>
+</div>
+
+<div class="location-bar">
+<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+<span>موقعك:</span>
+<span class="city-name" id="cityName">جاري التحديد...</span>
+</div>
+
+<div class="next-prayer">
+<div class="label">الصلاة القادمة</div>
+<div class="name" id="nextPrayerName">--</div>
+<div class="time" id="nextPrayerTime">--:--</div>
+<div class="countdown" id="countdown">--:--:--</div>
+</div>
+
+<div class="prayer-grid">
+<div class="prayer-card" data-prayer="Fajr"><div class="icon">🌅</div><div class="prayer-name">الفجر</div><div class="prayer-time" id="fajrTime">--:--</div><div class="prayer-time-12" id="fajrTime12"></div></div>
+<div class="prayer-card" data-prayer="Dhuhr"><div class="icon">☀️</div><div class="prayer-name">الظهر</div><div class="prayer-time" id="dhuhrTime">--:--</div><div class="prayer-time-12" id="dhuhrTime12"></div></div>
+<div class="prayer-card" data-prayer="Asr"><div class="icon">🌤️</div><div class="prayer-name">العصر</div><div class="prayer-time" id="asrTime">--:--</div><div class="prayer-time-12" id="asrTime12"></div></div>
+<div class="prayer-card" data-prayer="Maghrib"><div class="icon">🌇</div><div class="prayer-name">المغرب</div><div class="prayer-time" id="maghribTime">--:--</div><div class="prayer-time-12" id="maghribTime12"></div></div>
+<div class="prayer-card" data-prayer="Isha"><div class="icon">🌙</div><div class="prayer-name">العشاء</div><div class="prayer-time" id="ishaTime">--:--</div><div class="prayer-time-12" id="ishaTime12"></div></div>
+<div class="prayer-card" data-prayer="Sunrise"><div class="icon">🌄</div><div class="prayer-name">الشروق</div><div class="prayer-time" id="sunriseTime">--:--</div><div class="prayer-time-12" id="sunriseTime12"></div></div>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="showTab('quran')">📖 القرآن</button>
+<button class="tab-btn" onclick="showTab('hadith')">📿 الأحاديث</button>
+</div>
+
+<div class="tab-content active" id="quranTab">
+<div class="surah-card">
+<div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+<div class="ayah">
+الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ ﴿١﴾<br>
+الرَّحْمَنِ الرَّحِيمِ ﴿٢﴾<br>
+مَالِكِ يَوْمِ الدِّينِ ﴿٣﴾<br>
+إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ﴿٤﴾<br>
+اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ ﴿٥﴾<br>
+صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ ﴿٦﴾
+</div>
+</div>
+<div class="surah-card">
+<div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+<div class="ayah" id="baqarah">[جاري تحميل سورة البقرة...]</div>
+</div>
+</div>
+
+<div class="tab-content" id="hadithTab">
+<div class="hadith-card">
+<div class="hadith-text">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ...</div>
+<div class="hadith-source"><span class="badge">صحيح</span> رواه البخاري ومسلم</div>
+</div>
+</div>
+
+<div class="install-prompt" id="installPrompt">
+<div class="prompt-title">📱 أضف للشاشة الرئيسية</div>
+<div class="prompt-text">للوصول السريع لمواقيت الصلاة</div>
+<div class="prompt-buttons">
+<button class="btn-primary" onclick="addToHome()">إضافة</button>
+<button class="btn-secondary" onclick="dismissInstall()">لاحقاً</button>
+</div>
+</div>
+
+<div class="footer">
+<div>صلاتي سر حياتي</div>
+<div>اللهم اجعلنا من المقيمين الصلاة</div>
+</div>
+
+<script>
+let prayerTimes = {}, lat = 24.7136, lng = 46.6753;
+const prayerNames = {Fajr:"الفجر",Dhuhr:"الظهر",Asr:"العصر",Maghrib:"المغرب",Isha:"العشاء",Sunrise:"الشروق"};
+
+function to12Hour(t){const[h,m]=t.split(":").map(Number);return(h%12||12)+":"+String(m).padStart(2,"0")+" "+(h>=12?"م":"ص");}
+function formatDate(d){return d.toLocaleDateString("ar-SA",{weekday:"long",year:"numeric",month:"long",day:"numeric"});}
+
+async function getHijriDate(){
+  try{const r=await fetch("https://api.aladhan.com/v1/gToH?date="+new Date().toISOString().split("T")[0]);const d=await r.json();if(d.code===200){const h=d.data.hijri;return h.day+" "+h.month.ar+" "+h.year+" هـ";}}catch(e){}return"";
+}
+async function getCityName(lat,lng){
+  try{const r=await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ar`);const d=await r.json();return d.city||d.locality||"غير معروف";}catch(e){return"غير معروف";}
+}
+async function getPrayerTimes(){
+  const t=new Date();const ds=String(t.getDate()).padStart(2,"0")+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+t.getFullYear();
+  try{const r=await fetch(`https://api.aladhan.com/v1/timings/${ds}?latitude=${lat}&longitude=${lng}&method=4`);const d=await r.json();if(d.code===200)return d.data.timings;}catch(e){}return null;
+}
+
+function updatePrayerDisplay(){
+  if(!prayerTimes)return;
+  const times={Fajr:prayerTimes.Fajr,Sunrise:prayerTimes.Sunrise,Dhuhr:prayerTimes.Dhuhr,Asr:prayerTimes.Asr,Maghrib:prayerTimes.Maghrib,Isha:prayerTimes.Isha};
+  for(let[k,v]of Object.entries(times)){const el=document.getElementById(k.toLowerCase()+"Time");const el12=document.getElementById(k.toLowerCase()+"Time12");if(el)el.textContent=v;if(el12)el12.textContent=to12Hour(v);}
+  const now=new Date();const cm=now.getHours()*60+now.getMinutes();let np=null,nt=null,md=Infinity;
+  const order=["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"];
+  for(let p of order){const[h,m]=times[p].split(":").map(Number);const pm=h*60+m;let diff=pm-cm;if(diff<0)diff+=1440;if(diff<md){md=diff;np=p;nt=times[p];}}
+  if(np){document.getElementById("nextPrayerName").textContent=prayerNames[np];document.getElementById("nextPrayerTime").textContent=nt;document.querySelectorAll(".prayer-card").forEach(c=>c.classList.remove("active"));document.querySelector(`[data-prayer="${np}"]`)?.classList.add("active");}
+}
+
+function updateCountdown(){
+  if(!prayerTimes)return;
+  const now=new Date();const cm=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+  const times={Fajr:prayerTimes.Fajr,Sunrise:prayerTimes.Sunrise,Dhuhr:prayerTimes.Dhuhr,Asr:prayerTimes.Asr,Maghrib:prayerTimes.Maghrib,Isha:prayerTimes.Isha};
+  let np=null,md=Infinity;
+  for(let p of ["Fajr","Sunrise","Dhuhr","Asr","Maghrib","Isha"]){const[h,m]=times[p].split(":").map(Number);const pm=h*60+m;let diff=pm-cm;if(diff<0)diff+=1440;if(diff<md){md=diff;np=p;}}
+  if(np){const h=Math.floor(md/60),m=Math.floor(md%60),s=Math.floor((md-Math.floor(md))*60);document.getElementById("countdown").textContent=`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;}
+}
+
+function showTab(tab){document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));event.target.classList.add("active");document.getElementById(tab+"Tab").classList.add("active");}
+
+function addToHome(){if("standalone"in window.navigator&&window.navigator.standalone){alert("مضاف بالفعل!");}else if(window.beforeInstallPrompt){window.beforeInstallPrompt.prompt();}else{alert("اضغط زر المشاركة ثم 'إضافة للشاشة الرئيسية'");}}
+function dismissInstall(){document.getElementById("installPrompt").style.display="none";localStorage.setItem("installDismissed","true");}
+function checkInstallPrompt(){if(!window.matchMedia("(display-mode: standalone)").matches&&!localStorage.getItem("installDismissed"))setTimeout(()=>document.getElementById("installPrompt").style.display="block",3000);}
+
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window.beforeInstallPrompt=e;});
+
+async function init(){
+  document.getElementById("hijriDate").textContent=await getHijriDate();
+  document.getElementById("gregDate").textContent=formatDate(new Date());
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(async(pos)=>{
+      lat=pos.coords.latitude;lng=pos.coords.longitude;
+      document.getElementById("cityName").textContent=await getCityName(lat,lng);
+      prayerTimes=await getPrayerTimes();if(prayerTimes){updatePrayerDisplay();setInterval(updateCountdown,1000);updateCountdown();}
+      document.getElementById("loading").style.display="none";checkInstallPrompt();
+    },async()=>{
+      document.getElementById("cityName").textContent="الرياض (افتراضي)";
+      prayerTimes=await getPrayerTimes();if(prayerTimes){updatePrayerDisplay();setInterval(updateCountdown,1000);updateCountdown();}
+      document.getElementById("loading").style.display="none";checkInstallPrompt();
+    },{timeout:10000});
+  }else{
+    document.getElementById("cityName").textContent="الرياض (افتراضي)";
+    prayerTimes=await getPrayerTimes();if(prayerTimes){updatePrayerDisplay();setInterval(updateCountdown,1000);updateCountdown();}
+    document.getElementById("loading").style.display="none";checkInstallPrompt();
+  }
+}
+
+// Load Surah Baqarah from API
+fetch("https://api.alquran.cloud/v1/surah/2")
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.code===200){
+      const verses=d.data.ayahs.map((a,i)=>a.text+" ﴿"+(i+1)+"﴾").join("<br><br>");
+      document.getElementById("baqarah").innerHTML=verses;
+    }
+  })
+  .catch(()=>{document.getElementById("baqarah").textContent="تعذر تحميل السورة. يرجى التحقق من الاتصال بالإنترنت.";});
+
+init();
+</script>
+</body>
+</html>
